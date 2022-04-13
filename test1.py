@@ -1,6 +1,8 @@
 import torch
 import numpy as np
 import os
+n_gpu = torch.cuda.device_count()
+print(n_gpu)
 
 root_dir = '/home/jixi-li/WORK/Research/dataset/Few shot/omniglot_standard/python'
 root_dir_train = os.path.join(root_dir, 'images_background')
@@ -22,7 +24,7 @@ k_spt = 1  ## support data 的个数
 k_query = 15  ## query data 的个数
 imgsz = 28
 resize = imgsz
-task_num = 16
+task_num = 8
 batch_size = task_num
 
 indexes = {"train": 0, "test": 0}
@@ -315,6 +317,7 @@ class MetaLearner(nn.Module):
         loss_qry.backward()
         self.meta_optim.step()
 
+        loss_list_qry = loss_list_qry.cpu()
         accs = np.array(correct_list) / (query_size * task_num)
         loss = np.array(loss_list_qry) / (task_num)
         return accs, loss
@@ -375,7 +378,7 @@ np.random.seed(1337)
 
 import time
 
-device = torch.device('cuda:2')
+device = torch.device('cuda:0')
 
 meta = MetaLearner().to(device)
 
